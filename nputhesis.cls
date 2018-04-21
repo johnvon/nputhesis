@@ -2,18 +2,47 @@
 %% This is file `nputhesis.cls'.
 %%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{nputhesis}[2015/10/23 v0.02 NPU]
+\ProvidesClass{nputhesis}[2018/04/21 v0.4 NPU]
 
+\newif\if@npu@phd
+\newif\if@npu@blankinfo
+\newif\if@npu@multibib
+\@npu@multibibfalse
+\@npu@blankinfofalse
+\DeclareOption{phd}{\@npu@phdtrue}
+\DeclareOption{ma}{\@npu@phdfalse}
+\DeclareOption{blankinfo}{\@npu@blankinfotrue}
+\DeclareOption{multibib}{\@npu@multibibtrue}
+\DeclareOption{UTF8}{\PassOptionsToPackage{\CurrentOption}{ctex}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{book}}
+\ExecuteOptions{phd}
 \ProcessOptions \relax
 \LoadClass{book}
 
 \RequirePackage{geometry}
+\RequirePackage{xcolor}
 \RequirePackage{fancyhdr}
 \RequirePackage{titletoc}
 \RequirePackage{caption}
 \RequirePackage{ulem}
-\RequirePackage[UTF8]{ctexcap} % TODO make utf8 as parameter
+\RequirePackage{amsthm}
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+\RequirePackage{setspace}
+\RequirePackage{longtable}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{multirow}
+\RequirePackage{graphicx}
+\RequirePackage[heading=true,zihao=-4]{ctex}
+\RequirePackage{ifxetex}
+\ifxetex
+  \setmainfont{Times New Roman}
+\fi
+
+\if@npu@multibib
+  \RequirePackage{multibib}
+\fi
 
 \geometry{paperwidth=210mm,paperheight=297mm,%
   left=2.5cm,right=2.5cm,top=2.54cm,bottom=2.54cm}
@@ -22,13 +51,40 @@
 \footskip=8mm
 \headsep=5mm
 
-\CTEXsetup[name={,}, number={\arabic{chapter}},%
-  beforeskip={20pt}, afterskip={20pt}]{chapter}
-\CTEXsetup[nameformat={\heiti\zihao{3}\bf}]{chapter}
-\CTEXsetup[titleformat={\heiti\zihao{3}}]{chapter}
-\CTEXsetup[format={\heiti\zihao{4}}]{section}
-\CTEXsetup[format={\heiti\zihao{-4}}]{subsection}
-
+\ifx\ctexset\undefined
+  \CTEXsetup[name={,}, number={\arabic{chapter}},%
+    beforeskip={20pt}, afterskip={20pt}]{chapter}
+  \CTEXsetup[nameformat={\heiti\zihao{3}\bf}]{chapter}
+  \CTEXsetup[titleformat={\heiti\zihao{3}}]{chapter}
+  \CTEXsetup[format={\heiti\zihao{4}}]{section}
+  \CTEXsetup[format={\heiti\zihao{-4}}]{subsection}
+\else
+  \ctexset{
+    contentsname = {\npu@contents}
+  }
+  % title format of chapter
+  \ctexset{
+    chapter/name={,},
+    chapter/number=\arabic{chapter},
+    chapter/beforeskip={20bp},
+    chapter/afterskip={20bp},
+    chapter/format={\heiti\zihao{3}\centering}
+  }
+  % title format of section
+  \ctexset{
+    section/name={,},
+    % section/beforeskip={10pt},
+    % section/afterskip={0pt},
+    section/format={\heiti\zihao{4}}
+  }
+  % title format of subsection
+  \ctexset{
+    subsection/name={,},
+    % subsection/beforeskip={10pt},
+    % subsection/afterskip={0pt},
+    subsection/format={\heiti\zihao{-4}}
+  }
+\fi
 % content setting
 \def\@contentfont{\songti\zihao{-4}}
 \titlecontents{chapter}[0pt]{\@contentfont}
@@ -42,11 +98,11 @@
   {\hspace{.5em}\titlerule*{.}\contentspage}
 
 \pagestyle{fancy}
-\renewcommand{\chaptermark}[1]{\markboth{%
+\renewcommand\chaptermark[1]{\markboth{%
   \if@mainmatter%
-    \ifnum\arabic{chapter}>0%
+    %\ifnum\arabic{chapter}>0%
       \arabic{chapter}\quad%
-    \fi
+    %\fi%
   \fi#1}{}}
 \fancyhf{}
 \fancyhead[EC]{\songti\zihao{-5}\npu@rightmark}
@@ -68,15 +124,26 @@
 \def\@@title[#1]#2{\def\@title@en{#1}\def\@title{#2}}
 \def\@@author[#1]#2{\def\@author@en{#1}\def\@author{#2}}
 \def\@@major[#1]#2{\def\@major@en{#1}\def\@major{#2}}
-\def\@@supervisor[#1]#2{\def\@supervisor@en{#1}\def\@supervisor{#2}} 
+\def\@@supervisor[#1]#2{\def\@supervisor@en{#1}\def\@supervisor{#2}}
 \def\@@applydate[#1]#2{\def\@applydate@en{#1}\def\@applydate{#2}}
-\def\@title{} \def\@author{} \def\@major{} \def\@supervisor{} \def\@applydate{}
+\def\@title{}\def\@title@en{}
+\def\@author{}\def\@author@en{}
+\def\@major{}\def\@major@en{}
+\def\@supervisor{}\def\@supervisor@en{}
+\def\@applydate{}\def\@applydate@en{}
+\def\npu@empty{}
 
 \def\schoolno#1{\def\@schoolno{#1}}\def\@schoolno{}
 \def\classno#1{\def\@classno{#1}}\def\@classno{}
 \def\secretlevel#1{\def\@secretlevel{#1}}\def\@secretlevel{}
 \def\authorno#1{\def\@authorno{#1}}\def\@authorno{}
 \def\support#1{\def\@support{#1}}\def\@support{}
+
+\if@npu@phd
+  \def\npu@degreename@en{Doctor}
+\else
+  \def\npu@degreename@en{Master}
+\fi
 
 % set normal font size
 \renewcommand{\normalsize}{\zihao{-4}}
@@ -87,17 +154,18 @@
   \begin{titlepage}
     \linespread{1.25}
     \begin{center}
-      \bf
-      \hfill
+      \hfill\bf % default \bf font
       \newlength{\max@length}
       \settowidth{\max@length}{\npu@schoolno\npu@comma 2000000000}
       \newlength{\name@length}
       \settowidth{\name@length}{\npu@schoolno}
       \begin{minipage}{\max@length}
-        \makebox[\name@length][s]{\npu@schoolno}\npu@comma \@schoolno\\
-        \makebox[\name@length][s]{\npu@classno}\npu@comma \@classno\\
-        \makebox[\name@length][s]{\npu@secretlevel}\npu@comma \@secretlevel\\
-        \makebox[\name@length][s]{\npu@authorno}\npu@comma \@authorno\\
+        \begin{tabular}{|c|c|}\hline
+        \makebox[\name@length][s]{\npu@schoolno}   & \@schoolno    \\ \hline
+        \makebox[\name@length][s]{\npu@classno}    & \@classno     \\ \hline
+        \makebox[\name@length][s]{\npu@secretlevel}& \@secretlevel \\ \hline
+        \makebox[\name@length][s]{\npu@authorno}   & \@authorno    \\ \hline
+        \end{tabular}
       \end{minipage}
       \par\vspace{7cm}
       \zihao{1}
@@ -129,11 +197,14 @@
       \settowidth{\name@length}{\npu@applydate}
       \begin{minipage}{10cm}
         \noindent
-        \makebox[\name@length][s]{\npu@major} \uline{\hfill\@major\hfill} \par
+        \makebox[\name@length][s]{\npu@major}%
+          {\uline{\hfill{\@major}\hfill}}    \par
         \vspace{0.5\baselineskip}
-        \makebox[\name@length][s]{\npu@supervisor} \uline{\hfill\@supervisor\hfill} \par
+        \makebox[\name@length][s]{\npu@supervisor}%
+          {\uline{\hfill\@supervisor\hfill}} \par
         \vspace{0.5\baselineskip}
-        \makebox[\name@length][s]{\npu@applydate} \uline{\hfill\@applydate\hfill} \par
+        \makebox[\name@length][s]{\npu@applydate}%
+          {\uline{\hfill\@applydate\hfill}}  \par
       \end{minipage}
       \vspace{2\baselineskip}
     \end{center}
@@ -181,11 +252,14 @@
       \settowidth{\name@length}{\npu@major}
       \begin{minipage}{8cm}
         \noindent
-        \makebox[\name@length][s]{\npu@author}\npu@comma\uline{\hfill\@author\hfill}\par
-        \vspace{1\baselineskip}
-        \makebox[\name@length][s]{\npu@major}\npu@comma\uline{\hfill\@major\hfill}\par
-        \vspace{1\baselineskip}
-        \makebox[\name@length][s]{\npu@supervisor}\npu@comma\uline{\hfill\@supervisor\hfill}\par
+        \makebox[\name@length][s]{\npu@author}\npu@comma%
+          \uline{\hfill\@author\hfill}     \par
+        \vspace{0.25\baselineskip}
+        \makebox[\name@length][s]{\npu@major}\npu@comma%
+          \uline{\hfill\@major\hfill}     \par
+        \vspace{0.25\baselineskip}
+        \makebox[\name@length][s]{\npu@supervisor}\npu@comma%
+          \uline{\hfill\@supervisor\hfill}\par
         \vspace{1\baselineskip}
       \end{minipage}
       \vspace{2\baselineskip}
@@ -206,10 +280,10 @@
         \vspace{3\baselineskip}
         \zihao{-3}
         By\\
-        \@author@en \\
+        \ifx\@author@en\npu@empty\quad\else\@author@en\fi\\
         \vspace{1\baselineskip}
         Under the Supervision of Professor\\
-        \@supervisor@en\\}
+        \ifx\@supervisor@en\npu@empty\quad\else\@supervisor@en\fi\\}
       %\Large
       \vspace{4\baselineskip}
       A Dissertation Submitted to\\
@@ -217,7 +291,7 @@
       \vspace{1\baselineskip}
       In partial fulfillment of the requirement\\
       For the degree of\\
-      Doctor of \@major@en\\
+      \npu@degreename@en\  of \@major@en\\
       \vspace{4\baselineskip}
       Xi'an P. R. China\\
       \@applydate@en
@@ -228,8 +302,10 @@
 \def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
   \hbox{}
   \vspace*{\fill}
-  \begin{center}
-    \Large This Page Intentionally Left Blank!
+  \begin{center}\Large
+    \if@npu@blankinfo
+      \textcolor{gray!60}{This Page Intentionally Left Blank!}
+    \fi
   \end{center}
   \vspace{\fill}
   \thispagestyle{empty}
@@ -251,11 +327,7 @@
 \let\npu@frontmatter\frontmatter
 \def\frontmatter{\npu@frontmatter\pagenumbering{Roman}}
 
-\let\npu@tableofcontents\tableofcontents
-\def\tableofcontents{\npu@tableofcontents%
-  \addcontentsline{toc}{chapter}{\npu@contents}}
-
-\DeclareCaptionFont{song}{\songti\zihao{5}}
+\DeclareCaptionFont{song}{\songti\zihao{5}}  % command defined in package caption
 \captionsetup{labelsep=quad, font=song}
 \setlength{\abovecaptionskip}{10pt}
 \setlength{\belowcaptionskip}{10pt}
@@ -263,14 +335,14 @@
 \renewcommand\thefigure{\arabic{chapter}-\arabic{figure}}
 \renewcommand\theequation{\arabic{chapter}-\arabic{equation}}
 
-\let\npu@bibliographystyle\bibliographystyle
-\def\bibliographystyle#1{%
-  \addcontentsline{toc}{chapter}{\bibname}%
-  \npu@bibliographystyle{#1}}
+\let\npu@chapter\chapter
+\def\npu@star@chapter#1{\npu@chapter{#1}}
+\def\chapter{\secdef\npu@chapter\npu@star@chapter}
 
-\def\Appendix{\chapter{\npu@appendix}}
+\newcounter{npu@c@appendix}
+\setcounter{npu@c@appendix}{0}
+\def\Appendix{ \addtocounter{npu@c@appendix}{1}\chapter{\npu@appendix\Alph{npu@c@appendix}}}
 \def\Thanks{\chapter{\npu@thanks}}
-\def\Work{\chapter{\npu@work}}
 
 \def\statement{
   \begin{titlepage}
@@ -299,6 +371,31 @@
     \hfill\hskip8.5cm \npu@ymd
   \end{titlepage}}
 
-\input{npuphd.cfg}
+% ref amsthdoc.pdf
+\newtheoremstyle{nputheorem}% name
+  {0pt}% Space above
+  {0pt}% Space below
+  {\itshape}% Body font
+  {}% Indent amount
+  {\bfseries}% Theorem head font
+  {}% Punctuation after theorem head
+  {.5em}% Space after theorem head
+  {}% Theorem head spec (can be left empty, meaning ‘normal’ )
+
+\theoremstyle{nputheorem} % set default style to nputheorem
+
+\input{nputhesis.cfg}
+
+\if@npu@multibib
+  \newcites{@work}{\npu@work}
+  \newcommand\Work[3][nputhesis]{%
+    \usecounter{enumiv}
+    \nocite@work{#3}
+    \bibliographystyle@work{#1}
+    \bibliography@work{#2}
+  }
+\else
+  \def\Work{\chapter{\npu@work}}
+\fi
 
 \endinput
